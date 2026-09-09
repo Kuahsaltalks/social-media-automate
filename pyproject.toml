@@ -1,7 +1,7 @@
 [project]
-name = "social-media-automate"
+name = "mitroagents"
 version = "0.1.0"
-description = "Automated social media engine converting dictated thoughts into strictly character-limited, high-hook posts for X, LinkedIn, Threads, Substack, and Carousels."
+description = "MitroAgents: Autonomous AI agent pipeline converting thoughts & voice notes into strictly character-limited, high-converting content for X, Threads, LinkedIn, Substack, and Carousels."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [

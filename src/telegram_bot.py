@@ -43,12 +43,12 @@ user_sessions = {}
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Welcome message and instructions."""
     welcome_text = (
-        "🎙️ *Social Media Automation Bot Ready!*\n\n"
+        "🎙️ *MitroAgents Remote Command Center Ready!*\n\n"
         "Whenever you have a thought, idea, or research note:\n"
         "1. 🗣️ *Send a Voice Note* (dictate directly while walking or thinking)\n"
         "2. ✍️ *Or send a Text Message*\n"
-        "3. 🔗 *Or drop any Link / Tweet* (for fear/ragebait quote tweet angles)\n\n"
-        "The engine will automatically:\n"
+        "3. 🔗 *Or drop any Link / Tweet* (for an intelligent human quote tweet on X)\n\n"
+        "MitroAgents will automatically:\n"
         "• 🖼️ *Generate a Scroll-Stopping Hero Hook Image* (1080x1350 4:5 with your face or news subject + bottom gradient + curiosity headline)\n"
         "• 🐦 *X (Twitter)* (<= 280 chars)\n"
         "• 🧵 *Meta Threads* (<= 500 chars)\n"
@@ -56,7 +56,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• 🎨 *Carousel Deck* (5-7 illustrated slides)\n"
         "• 🔴 *Substack Note* (<= 1,000 chars)\n"
         "• 📰 *Substack Newsletter* (Full Article)\n"
-        "• ⚡ *Quote Tweet Multi-Angle System* (Visceral 'we are cooked' reactions)\n\n"
+        "• ⚡ *Intelligent Single Quote-Tweet for X*\n\n"
         "You get 1-tap buttons to publish each format standalone or all together!"
     )
     await update.message.reply_text(welcome_text, parse_mode="Markdown")

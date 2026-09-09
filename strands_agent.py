@@ -1,3 +1,9 @@
+"""
+MitroAgents — Strands Agents SDK Social Media Distribution Agent.
+
+Autonomous multi-platform content generation, strict constraint enforcement,
+and multi-channel dispatch using the Strands Agents SDK (@tool decorator and Agent pattern).
+"""
 import os
 import sys
 from strands import Agent, tool
@@ -20,9 +26,9 @@ def dispatch_to_channels(content_payload: str) -> str:
 # Initialize Strands Autonomous Agent
 agent = Agent(
     system_prompt=(
-        "You are an autonomous social media distribution agent. Given an unrefined thought, "
-        "you reason across target platforms, formulate tailored drafts, enforce strict character "
-        "ceilings, generate visual prompts, and trigger dispatch."
+        "You are MitroAgents, an autonomous social media distribution agent powered by the Strands SDK. "
+        "Given an unrefined thought, you reason across target platforms, formulate tailored drafts, "
+        "enforce strict character ceilings, generate visual prompts, and trigger dispatch."
     ),
     tools=[format_and_validate_post, dispatch_to_channels]
 )

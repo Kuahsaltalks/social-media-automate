@@ -1,157 +1,151 @@
-# Social Media Automation Engine (Gemini 3.8 / Flash)
+# 🤖 MitroAgents — Autonomous Social Media Distribution & Intelligence Engine
 
-An automated social media engine that turns your raw, dictated thoughts, streams of consciousness, or research notes into high-converting, platform-tailored content across **5 major platforms**—with **strict, non-negotiable character limit enforcement** (never exceeding by even 1 character).
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Strands Agents SDK](https://img.shields.io/badge/SDK-Strands%20Agents-purple.svg)](https://github.com/Kuahsaltalks/mitroagents)
+
+**MitroAgents** is an autonomous AI agent pipeline that transforms raw dictated thoughts, streams of consciousness, voice notes, and shared breaking links into high-converting, platform-tailored content across **6 major distribution channels**—with **strict, non-negotiable character limit enforcement** and 1-tap live publishing.
 
 ---
 
-## ⚡ Key Features
+## ⚡ Key Capabilities
 
-1. **Strict Character Limit Enforcement**:
-   - **X (Twitter - Free Tier)**: Hard ceiling $\le 280$ characters.
-   - **Meta Threads**: Hard ceiling $\le 500$ characters.
-   - **LinkedIn**: Hard ceiling $\le 3,000$ characters (5-beat storytelling format, real-life relatable friction, tension, and clear payoff).
-   - **Carousel Slide Deck**: 5 to 7 slides, strictly $\le 220$ characters per slide with visual design prompts.
-   - **Substack Newsletter**: Deep-dive newsletter edition with subject line, preview subtitle, core thesis, and 3 key takeaways.
-   - **Zero-Overage Validator**: Every post is automatically counted and validated against the ceiling. If the AI exceeds by even 1 character, the strict engine cleans and trims at natural sentence/word boundaries.
+1. **Autonomous Multi-Platform Distribution**:
+   - **X / Twitter**: Hard ceiling $\le 280$ characters, pattern interrupts, and single intelligent quote-tweets.
+   - **Meta Threads**: Hard ceiling $\le 500$ characters, authentic conversational tone.
+   - **LinkedIn Storytelling**: Hard ceiling $\le 3,000$ characters (5-beat storytelling format: personal friction, stakes, pivot, takeaway).
+   - **Carousel Slide Decks**: 5 to 7 slides, strictly $\le 220$ characters per slide with auto-rendered 1080x1350 visual cards & combined PDF.
+   - **Substack Notes**: Live automated browser posting via Playwright directly in your running Chrome session.
+   - **Substack Newsletter**: Full deep-dive article generation with subject line, subtitle, and markdown body.
+   - **Hero Hook Image Generator**: 1080x1350 4:5 image with dynamic bottom gradient, bold typography, subtle watermarks, and face/news subject integration.
 
-2. **Modular Training Architecture (`rules/`, `skills/`, `learnings/`)**:
-   - `rules/`: Houses hard platform limits (`platform_limits.json`), hook psychology formulas (`hooks_and_triggers.md`), and narrative requirements (`linkedin_storytelling.md`).
+2. **Strands Agents SDK Integration (`strands_agent.py`)**:
+   - Native integration with the **Strands Agents SDK** using the `@tool` decorator pattern.
+   - Autonomous agent reasoning over `format_and_validate_post`, `generate_full_social_package`, `generate_quote_tweet`, and `dispatch_to_channels`.
+
+3. **Telegram Bot Remote Command Center (`./run.py --bot`)**:
+   - Dictate thoughts via voice notes while walking or thinking—transcribed directly via Gemini Flash Audio API.
+   - Send any breaking link or tweet for an authentic, human-intelligence quote tweet on X.
+   - 1-tap interactive inline buttons to publish directly to Buffer or open Substack.
+
+4. **Zero-Overage Validator (`src/validator.py`)**:
+   - Non-negotiable limit enforcement. If any model exceeds a platform ceiling, the strict engine cleans and trims at natural sentence/word boundaries.
+
+5. **Modular Training Architecture (`rules/`, `skills/`, `learnings/`)**:
+   - `rules/`: Exact platform constraints (`platform_limits.json`), hook psychology formulas (`hooks_and_triggers.md`), and narrative requirements.
    - `skills/`: Platform-specific prompt recipes for X, Threads, LinkedIn, Carousels, and Substack.
-   - `learnings/`: Train the model on your personal voice (`user_voice_profile.md`), what NOT to do (`anti_patterns.md`), and your top-performing posts (`successful_posts.md`).
-
-3. **Future-Ready GitHub Automated Publishing**:
-   - Includes `src/publisher_stub.py` and `.github/workflows/social_publish.yml` for automated Git-backed publishing.
+   - `learnings/`: Personal voice guidelines (`user_voice_profile.md`), anti-patterns (`anti_patterns.md`), and winning post benchmarks (`successful_posts.md`).
 
 ---
 
 ## 🚀 Quick Start
 
 ### 1. Environment Setup
-The project uses `uv` for fast package management:
 
 ```bash
-# Setup environment and install dependencies
-uv venv
-uv pip install google-genai python-dotenv pydantic rich
+# Clone the repository
+git clone https://github.com/Kuahsaltalks/mitroagents.git
+cd mitroagents
 
-# Copy and configure your Gemini API Key
+# Install dependencies using uv
+uv venv
+uv pip install -e .
+
+# Configure API Keys
 cp .env.example .env
-# Edit .env and set GEMINI_API_KEY=your_key_here
 ```
 
-### 2. Generate Content from Your Dictated Thoughts
+Edit `.env` and set your credentials:
+```env
+GEMINI_API_KEY=your_gemini_api_key
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+BUFFER_API_KEY=your_buffer_personal_api_key
+```
 
-#### Option A: Interactive Dictation Mode
-Run without arguments, paste your voice transcript or stream of consciousness, and press `Ctrl+D`:
+---
+
+## 🤖 Running MitroAgents
+
+### 1. Run the Telegram Bot Daemon
+```bash
+./run.py --bot
+```
+Now send voice notes, brain dumps, or tweet links straight from your phone!
+
+### 2. Run the Strands Autonomous Agent
+```bash
+python strands_agent.py "Why friction and unpolished authenticity beats 4K corporate polish on social media."
+```
+
+### 3. Interactive CLI Generation
 ```bash
 ./run.py
 ```
 
-#### Option B: Direct Command Line Argument
+### 4. Single-Thought Generation
 ```bash
-./run.py --thought "I've been thinking about why early startups fail to get traction. They spend 6 months polishing code and 0 days talking to real users in the wild."
+./run.py --thought "I've been thinking about why early startups fail to get traction."
 ```
 
-#### Option C: Pass a File with Notes / Dictation
+### 5. Automated 1-Tap Publishing
 ```bash
-./run.py --file path/to/my_research.md
-```
+# Publish batch to Buffer (X, Threads, LinkedIn)
+./run.py --post-buffer outputs/latest_batch/
 
-#### Option D: Specify Custom Gemini Model
-```bash
-./run.py --model gemini-2.5-flash --thought "..."
+# Publish Substack Article in Active Chrome
+./run.py --post-substack outputs/latest_batch/
 ```
 
 ---
 
-## 📡 Automated Publishing (Buffer & Substack)
-
-### 1. Free Posting to X, LinkedIn, & Threads (via Buffer API)
-Buffer's free plan allows up to 3 channels (e.g. X, LinkedIn, Threads) with zero developer app fees.
-1. Get your free Personal API key at: [publish.buffer.com/settings/api](https://publish.buffer.com/settings/api)
-2. Add it to `.env`:
-   ```bash
-   BUFFER_API_KEY=your_key_here
-   ```
-3. Check your connected channels:
-   ```bash
-   ./run.py --check-buffer
-   ```
-4. Dispatch any generated batch directly to Buffer:
-   ```bash
-   ./run.py --post-buffer outputs/20260906_walking_and_writing/
-   ```
-
-### 2. Substack Automated Drafts (via Browser Automation)
-Substack drafts are automated via Playwright without needing API keys.
-1. **One-Time Login**:
-   ```bash
-   ./run.py --substack-login
-   ```
-   A browser opens. Log into your Substack account once. Your session will be safely remembered.
-2. **Auto-Create Draft**:
-   ```bash
-   ./run.py --post-substack outputs/20260906_walking_and_writing/
-   ```
-   The browser will open, populate the Title, Subtitle, and Body, and save the draft ready for your review!
-
-
----
-
-## 📁 Project Structure
+## 📁 Repository Architecture
 
 ```
-Social media automate/
-├── .env.example                     # Environment template (GEMINI_API_KEY, Model choice)
-├── pyproject.toml                   # Project dependencies and metadata
-├── run.py                           # Convenient 1-line root runner
-├── rules/                           # Strict guidelines, limits & safety checks
-│   ├── platform_limits.json         # Machine-readable exact platform constraints
+mitroagents/
+├── strands_agent.py                 # Strands Agents SDK autonomous agent
+├── pyproject.toml                   # Project dependencies and packaging
+├── run.py                           # Root entrypoint CLI runner
+├── LICENSE                          # MIT License
+├── rules/                           # Strict platform limits & storytelling rules
+│   ├── platform_limits.json         # Exact platform constraints
 │   ├── platform_limits.md           # Documentation of character ceilings
-│   ├── hooks_and_triggers.md        # Hook engineering (curiosity gap, emotional, contrarian/ragebait)
-│   └── linkedin_storytelling.md     # Narrative frameworks (relatable experience, tension, resolution)
-├── skills/                          # Prompt skills for each platform
-│   ├── x_crafting.md                # 280-character post crafting skill
-│   ├── threads_crafting.md          # 500-character conversational post skill
-│   ├── linkedin_storytelling.md     # 3,000-character story post skill
-│   ├── carousel_builder.md          # Slide-by-slide hook-to-CTA carousel skill
+│   ├── hooks_and_triggers.md        # Hook engineering formulas
+│   └── linkedin_storytelling.md     # Narrative frameworks
+├── skills/                          # Prompt skills per platform
+│   ├── x_crafting.md                # 280-char X crafting skill
+│   ├── threads_crafting.md          # 500-char Threads skill
+│   ├── linkedin_storytelling.md     # 3,000-char LinkedIn storytelling
+│   ├── carousel_builder.md          # Slide-by-slide carousel skill
+│   ├── substack_notes.md            # Substack Notes short-form skill
 │   └── substack_essay.md            # Long-form newsletter essay skill
-├── learnings/                       # Training memory & feedback loop
-│   ├── user_voice_profile.md        # Tone, slang, style preferences, what to follow
-│   ├── anti_patterns.md             # What NOT to do (cringe corporate jargon, emoji spam)
-│   └── successful_posts.md          # Benchmark high-performing posts
-├── src/                             # Core Python engine
-│   ├── __init__.py
-│   ├── config.py                    # Loader for rules, skills, learnings, and env
-│   ├── validator.py                 # Strict character counter & trimmer
-│   ├── engine.py                    # Gemini client & prompt orchestrator
-│   ├── publisher_stub.py            # Future GitHub Actions publisher
+├── learnings/                       # Persona memory & voice training
+│   ├── user_voice_profile.md        # Tone, voice, zero-contraction rules
+│   ├── anti_patterns.md             # What NOT to do
+│   └── successful_posts.md          # Benchmark top performers
+├── src/                             # Core engine modules
+│   ├── engine.py                    # Multi-platform generation & link quote engine
+│   ├── validator.py                 # Strict character limit counter & trimmer
+│   ├── telegram_bot.py              # Telegram bot remote daemon
+│   ├── buffer_publisher.py          # Buffer API publisher (with media uploads)
+│   ├── hero_image_generator.py      # 1080x1350 Hero Hook image generator
+│   ├── carousel_renderer.py         # 1080x1350 slide cards & PDF compiler
+│   ├── substack_poster.py           # Playwright active Chrome browser automation
+│   ├── config.py                    # Environment & config loader
 │   └── cli.py                       # Rich terminal interface
-├── tests/
-│   └── test_validator.py            # Automated tests for strict limit enforcement
-├── outputs/                         # Output batches (JSON + Markdown)
-└── .github/workflows/
-    └── social_publish.yml           # Automated GitHub publishing workflow
+└── tests/
+    └── test_validator.py            # Automated tests for strict limit enforcement
 ```
-
----
-
-## 🎯 How to Train and Customize the Engine
-
-1. **Change Your Tone / Slang**:
-   Edit `learnings/user_voice_profile.md` with words, catchphrases, or stylistic preferences you want the engine to use.
-2. **Ban Annoying Phrases or Habits**:
-   Add unwanted corporate buzzwords or emoji habits into `learnings/anti_patterns.md`.
-3. **Add Winning Posts (Few-Shot Training)**:
-   Whenever you have a post that gets great engagement, paste it into `learnings/successful_posts.md`. The engine reads this file on every run to emulate your top performers.
-4. **Adjust Platform Limits**:
-   Edit `rules/platform_limits.json` if you ever upgrade account tiers or want tighter constraints.
 
 ---
 
 ## 🧪 Testing the Validator
-Run the automated test suite to ensure the strict character counter and boundary trim logic never fail:
+Run the automated test suite to ensure strict character counts and boundary trim logic never fail:
 
 ```bash
 python3 -m unittest tests/test_validator.py
 ```
+
+---
+
+## 📜 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
