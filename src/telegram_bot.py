@@ -205,6 +205,17 @@ async def process_thought(update: Update, context: ContextTypes.DEFAULT_TYPE, th
         logger.error(f"Error processing thought: {e}", exc_info=True)
         await progress_msg.edit_text(f"❌ Error generating posts: {str(e)}")
 
+async def safe_edit_text(message, text: str, reply_markup=None, parse_mode="Markdown"):
+    """Edits a telegram message safely. Falls back to plain text if Markdown parsing fails."""
+    try:
+        return await message.edit_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+    except Exception as e:
+        if "can't parse entities" in str(e).lower() or "entity" in str(e).lower():
+            logger.warning(f"Telegram entity parse error. Falling back to plain text: {e}")
+            plain = text.replace("*", "").replace("_", "").replace("`", "")
+            return await message.edit_text(plain, reply_markup=reply_markup, parse_mode=None)
+        raise e
+
 async def process_link_quote(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str, url: str):
     """Fetches link context and generates an intelligent human quote tweet for X."""
     progress_msg = await update.message.reply_text("⚡ *Reading shared link & crafting intelligent human quote for X...*", parse_mode="Markdown")
@@ -226,9 +237,8 @@ async def process_link_quote(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
         preview_text = (
             "🐦 *Quote Tweet Ready for X:*\n\n"
-            f"🔗 *Original Link:* {url}\n\n"
-            f"📝 *Quote:*\n"
-            f"_{quote_text}_\n\n"
+            f"🔗 *Original Link:*\n{url}\n\n"
+            f"📝 *Quote:*\n{quote_text}\n\n"
             f"💡 *Angle:* {angle_summary}"
         )
 
@@ -240,11 +250,11 @@ async def process_link_quote(update: Update, context: ContextTypes.DEFAULT_TYPE,
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await progress_msg.edit_text(preview_text, parse_mode="Markdown", reply_markup=reply_markup)
+        await safe_edit_text(progress_msg, preview_text, reply_markup=reply_markup)
 
     except Exception as e:
         logger.error(f"Error generating quote reaction: {e}", exc_info=True)
-        await progress_msg.edit_text(f"❌ Error generating quote: {str(e)}")
+        await safe_edit_text(progress_msg, f"❌ Error generating quote: {str(e)}", parse_mode=None)
 
 async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles button taps from inline keyboards."""
@@ -272,7 +282,7 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         pub = BufferPublisher()
         res = pub.publish_post("x", full_post, share_now=True)
         status = "✔ Sent Live to X!" if res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {}).get("status") == "sent" else "Queued / Published"
-        await status_msg.edit_text(f"🐦 *X Quote Tweet Published:*\n\n{status}\n\n📝 *Post:*\n_{full_post}_", parse_mode="Markdown")
+        await safe_edit_text(status_msg, f"🐦 *X Quote Tweet Published:*\n\n{status}\n\n📝 *Post:*\n{full_post}")
         return
 
     elif query.data == "regen_quote_x":
@@ -295,9 +305,8 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
 
             preview_text = (
                 "🐦 *New Quote Tweet Ready for X:*\n\n"
-                f"🔗 *Original Link:* {url}\n\n"
-                f"📝 *Quote:*\n"
-                f"_{quote_text}_\n\n"
+                f"🔗 *Original Link:*\n{url}\n\n"
+                f"📝 *Quote:*\n{quote_text}\n\n"
                 f"💡 *Angle:* {angle_summary}"
             )
 
@@ -307,10 +316,10 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
                     InlineKeyboardButton("🔄 Regenerate Take", callback_data="regen_quote_x"),
                 ]
             ]
-            await status_msg.edit_text(preview_text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+            await safe_edit_text(status_msg, preview_text, reply_markup=InlineKeyboardMarkup(keyboard))
         except Exception as e:
             logger.error(f"Error regenerating quote: {e}", exc_info=True)
-            await status_msg.edit_text(f"❌ Error regenerating quote: {str(e)}")
+            await safe_edit_text(status_msg, f"❌ Error regenerating quote: {str(e)}", parse_mode=None)
         return
 
     # 1. Standalone X / Twitter
