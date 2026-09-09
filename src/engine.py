@@ -508,3 +508,33 @@ You MUST respond with a valid JSON object strictly matching this schema:
                 "user_expression": "serious"
             }
         })
+
+_thought_cache = {}
+
+def generate_post(raw_thought: str, platform: str) -> str:
+    """
+    Convenience helper to generate a post for a specific target platform.
+    Used by Strands Agent SDK tools.
+    """
+    global _thought_cache
+    if raw_thought in _thought_cache:
+        data = _thought_cache[raw_thought]
+    else:
+        engine = SocialMediaEngine()
+        data = engine.generate_content(raw_thought)
+        _thought_cache[raw_thought] = data
+
+    plat = platform.lower().strip()
+    if plat in ["x", "twitter"]:
+        return data.get("x", {}).get("post", "")
+    elif plat in ["threads", "meta_threads"]:
+        return data.get("threads", {}).get("post", "")
+    elif plat in ["linkedin", "li"]:
+        return data.get("linkedin", {}).get("post", "")
+    elif plat in ["substack_note", "note"]:
+        return data.get("substack_note", {}).get("post", "")
+    elif plat in ["substack", "newsletter"]:
+        return data.get("substack", {}).get("body_markdown", "")
+    return data.get("x", {}).get("post", "")
+
+

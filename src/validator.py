@@ -107,9 +107,16 @@ def enforce_strict_trim(text: str, limit: int) -> str:
     if last_punct > limit - 60 and last_punct > 0:
         return truncated[:last_punct + 1].strip()
     
-    # Fallback to last whitespace
-    last_space = truncated.rfind(' ')
-    if last_space > 0:
-        return truncated[:last_space].rstrip()
-    
     return truncated
+
+def validate_limits(content: str, platform: str) -> str:
+    """
+    Enforces strict platform character limit ceiling and returns trimmed content.
+    Used by Strands Agent SDK tools.
+    """
+    limits = load_platform_limits()
+    limit = DEFAULT_LIMITS.get(platform.lower().strip(), 3000)
+    if platform.lower().strip() in limits and "max_characters" in limits[platform.lower().strip()]:
+        limit = limits[platform.lower().strip()]["max_characters"]
+    return enforce_strict_trim(content, limit)
+
