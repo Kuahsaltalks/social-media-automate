@@ -1,0 +1,45 @@
+{
+  "x": {
+    "platform_name": "X (Twitter)",
+    "account_tier": "Free",
+    "max_characters": 280,
+    "target_characters": 260,
+    "strict_limit": true,
+    "allow_threads": false,
+    "guidelines": "Must be 280 characters or fewer. Not a single character more. Punchy, contrarian, insight-dense."
+  },
+  "threads": {
+    "platform_name": "Threads (Meta)",
+    "max_characters": 500,
+    "target_characters": 450,
+    "strict_limit": true,
+    "guidelines": "Casual, conversational, hot-take or thought-provoking question. Max 500 characters."
+  },
+  "linkedin": {
+    "platform_name": "LinkedIn",
+    "max_characters": 3000,
+    "target_characters": 2200,
+    "strict_limit": true,
+    "guidelines": "Narrative arc: 1-2 line irresistible hook ('see more' trigger) -> relatable real-life experience/conflict -> failure or revelation -> distilled insight/playbook -> clear CTA or discussion question. Max 3,000 characters."
+  },
+  "carousel": {
+    "platform_name": "Carousel (LinkedIn/Instagram/X)",
+    "min_slides": 5,
+    "max_slides": 8,
+    "max_characters_per_slide": 220,
+    "strict_limit": true,
+    "guidelines": "Slide 1: High-contrast Hook + visual idea. Slides 2-(N-1): 1 bite-sized concept per slide. Final Slide: Summary + Call to Action."
+  },
+  "substack_note": {
+    "platform_name": "Substack Notes (Short-form feed)",
+    "max_characters": 1000,
+    "target_characters": 600,
+    "strict_limit": true,
+    "guidelines": "Intellectual, reflective, writer/reader-centric micro-essay for Substack feed. Max 1,000 characters."
+  },
+  "substack_newsletter": {
+    "platform_name": "Substack (Long-form Newsletter / Post)",
+    "strict_limit": false,
+    "guidelines": "Engaging Subject Line / Title, Hook Subtitle, Thesis Statement, The Backstory / Research, The Key Takeaways, Practical Application, Conclusion / Discussion prompt."
+  }
+}

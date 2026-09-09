@@ -1,0 +1,16 @@
+[project]
+name = "social-media-automate"
+version = "0.1.0"
+description = "Automated social media engine converting dictated thoughts into strictly character-limited, high-hook posts for X, LinkedIn, Threads, Substack, and Carousels."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "google-genai>=0.1.1",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "rich>=13.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
