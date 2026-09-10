@@ -1,16 +1,16 @@
-"""
-Buffer API automated publisher for X, LinkedIn, and Threads.
-
-Uses Buffer's modern GraphQL API (api.buffer.com) with Personal Access Tokens.
-Supports single or multi-account posting.
-"""
 import os
 import json
+import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import urllib.request
 import urllib.parse
 import urllib.error
+import requests
+
+from .config import get_env_config
+
+logger = logging.getLogger(__name__)
 
 class BufferPublisher:
     def __init__(self, access_tokens: Optional[List[str]] = None):
@@ -18,6 +18,7 @@ class BufferPublisher:
         access_tokens: list of Buffer Personal API Keys.
         If not provided, reads BUFFER_API_KEY or BUFFER_API_KEY_1, BUFFER_API_KEY_2 from environment.
         """
+        get_env_config()
         if access_tokens:
             self.tokens = access_tokens
         else:
@@ -99,57 +100,58 @@ class BufferPublisher:
         return all_channels
 
     def upload_image_to_cdn(self, file_path: Path) -> Optional[str]:
-        """Uploads a local image to a high-speed CDN to obtain a public URL for Buffer API."""
-        if not file_path or not file_path.exists():
+        """Uploads a local image to a high-speed direct CDN to obtain a public URL for Buffer API."""
+        if not file_path or not Path(file_path).exists():
             return None
 
-        # 1. Try freeimage.host API
-        try:
-            import base64
-            with open(file_path, "rb") as f:
-                b64_img = base64.b64encode(f.read()).decode("utf-8")
-            data = urllib.parse.urlencode({
-                "key": "6d207e02198a847aa98d0a2a901485a5",
-                "action": "upload",
-                "source": b64_img,
-                "format": "json"
-            }).encode("utf-8")
-            req = urllib.request.Request("https://freeimage.host/api/1/upload", data=data, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                res = json.loads(resp.read().decode())
-                img_url = res.get("image", {}).get("url")
-                if img_url:
-                    print(f"[✔ Buffer Media Upload] Image hosted at: {img_url}")
-                    return img_url
-        except Exception as e:
-            print(f"[Warning] freeimage upload failed: {e}")
+        p = Path(file_path)
 
-        # 2. Try tmpfiles.org fallback
+        # 1. Primary: Catbox.moe (Direct raw static file serving, universally readable by Buffer/Meta/X)
         try:
-            boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
-            with open(file_path, "rb") as f:
-                file_bytes = f.read()
-            body = bytearray()
-            body.extend(f"--{boundary}\r\n".encode())
-            body.extend(f'Content-Disposition: form-data; name="file"; filename="{file_path.name}"\r\n'.encode())
-            body.extend(b"Content-Type: image/png\r\n\r\n")
-            body.extend(file_bytes)
-            body.extend(f"\r\n--{boundary}--\r\n".encode())
-
-            req = urllib.request.Request(
-                "https://tmpfiles.org/api/v1/upload",
-                data=bytes(body),
-                headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"}
-            )
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                res = json.loads(resp.read().decode())
-                raw_url = res.get("data", {}).get("url", "")
-                if raw_url:
-                    direct_url = raw_url.replace("tmpfiles.org/", "tmpfiles.org/dl/")
-                    print(f"[✔ Buffer Media Upload] Image hosted at: {direct_url}")
-                    return direct_url
+            with open(p, "rb") as f:
+                resp = requests.post(
+                    "https://catbox.moe/user/api.php",
+                    data={"reqtype": "fileupload"},
+                    files={"fileToUpload": (p.name, f, "image/png")},
+                    timeout=15
+                )
+            if resp.status_code == 200 and resp.text.startswith("http"):
+                img_url = resp.text.strip()
+                logger.info(f"[✔ Catbox CDN Upload] Image hosted at: {img_url}")
+                return img_url
         except Exception as e:
-            print(f"[Warning] tmpfiles upload failed: {e}")
+            logger.warning(f"Catbox upload failed: {e}")
+
+        # 2. Secondary: Litterbox (Temporary 24h direct upload)
+        try:
+            with open(p, "rb") as f:
+                resp = requests.post(
+                    "https://litterbox.catbox.moe/resources/internals/api.php",
+                    data={"reqtype": "fileupload", "time": "24h"},
+                    files={"fileToUpload": (p.name, f, "image/png")},
+                    timeout=15
+                )
+            if resp.status_code == 200 and resp.text.startswith("http"):
+                img_url = resp.text.strip()
+                logger.info(f"[✔ Litterbox CDN Upload] Image hosted at: {img_url}")
+                return img_url
+        except Exception as e:
+            logger.warning(f"Litterbox upload failed: {e}")
+
+        # 3. Tertiary: 0x0.st
+        try:
+            with open(p, "rb") as f:
+                resp = requests.post(
+                    "https://0x0.st",
+                    files={"file": (p.name, f, "image/png")},
+                    timeout=15
+                )
+            if resp.status_code == 200 and resp.text.startswith("http"):
+                img_url = resp.text.strip()
+                logger.info(f"[✔ 0x0.st CDN Upload] Image hosted at: {img_url}")
+                return img_url
+        except Exception as e:
+            logger.warning(f"0x0.st upload failed: {e}")
 
         return None
 

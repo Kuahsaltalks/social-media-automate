@@ -338,8 +338,17 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         status_msg = await query.message.reply_text("⏳ *Publishing post + Hero Image to X (Twitter) via Buffer...*", parse_mode="Markdown")
         pub = BufferPublisher()
         res = pub.publish_post("x", text, share_now=True, media_path=hero_img)
-        status = "✔ Sent Live to X (with Hero Image)!" if res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {}).get("status") == "sent" else "Queued / Published (with Image)"
-        await status_msg.edit_text(f"🐦 *X (Twitter) Update:*\n\n{status}\n\n📝 *Text:*\n_{text}_", parse_mode="Markdown")
+        post_obj = res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {})
+        err_msg = res.get("response", {}).get("data", {}).get("createPost", {}).get("message", "")
+        
+        if post_obj.get("status") in ["sent", "sending"]:
+            status = "✔ Sent Live to X (with Hero Image)!"
+        elif err_msg:
+            status = f"❌ Buffer Error: {err_msg}"
+        else:
+            status = "✔ Dispatched / Queued to X"
+
+        await safe_edit_text(status_msg, f"🐦 *X (Twitter) Update:*\n\n{status}\n\n📝 *Text:*\n{text}")
 
     # 2. Standalone Meta Threads
     elif query.data == "post_threads":
@@ -357,8 +366,17 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         status_msg = await query.message.reply_text("⏳ *Publishing post + Hero Image to Threads via Buffer...*", parse_mode="Markdown")
         pub = BufferPublisher()
         res = pub.publish_post("threads", text, share_now=True, media_path=hero_img)
-        status = "✔ Sent Live to Threads (with Hero Image)!" if res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {}).get("status") == "sent" else "Queued / Published (with Image)"
-        await status_msg.edit_text(f"🧵 *Threads Update:*\n\n{status}\n\n📝 *Text:*\n_{text}_", parse_mode="Markdown")
+        post_obj = res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {})
+        err_msg = res.get("response", {}).get("data", {}).get("createPost", {}).get("message", "")
+
+        if post_obj.get("status") in ["sent", "sending"]:
+            status = "✔ Sent Live to Threads (with Hero Image)!"
+        elif err_msg:
+            status = f"❌ Buffer Error: {err_msg}"
+        else:
+            status = "✔ Dispatched / Queued to Threads"
+
+        await safe_edit_text(status_msg, f"🧵 *Threads Update:*\n\n{status}\n\n📝 *Text:*\n{text}")
 
     # 3. Standalone LinkedIn
     elif query.data == "post_linkedin":
@@ -376,8 +394,17 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         status_msg = await query.message.reply_text("⏳ *Publishing post + Hero Image to LinkedIn via Buffer...*", parse_mode="Markdown")
         pub = BufferPublisher()
         res = pub.publish_post("linkedin", text, share_now=True, media_path=hero_img)
-        status = "✔ Sent Live to LinkedIn (with Hero Image)!" if res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {}).get("status") == "sent" else "Queued / Published (with Image)"
-        await status_msg.edit_text(f"💼 *LinkedIn Update:*\n\n{status}\n\n📝 *Text:*\n_{text[:250]}..._", parse_mode="Markdown")
+        post_obj = res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {})
+        err_msg = res.get("response", {}).get("data", {}).get("createPost", {}).get("message", "")
+
+        if post_obj.get("status") in ["sent", "sending"]:
+            status = "✔ Sent Live to LinkedIn (with Hero Image)!"
+        elif err_msg:
+            status = f"❌ Buffer Error: {err_msg}"
+        else:
+            status = "✔ Dispatched / Queued to LinkedIn"
+
+        await safe_edit_text(status_msg, f"💼 *LinkedIn Update:*\n\n{status}\n\n📝 *Text:*\n{text[:250]}...")
 
     # 4. Standalone Substack Note (Browser Automation)
     elif query.data == "post_substack_note":
@@ -401,14 +428,14 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         try:
             res = await asyncio.to_thread(_do_substack_note)
             if res.get("status") == "published_note_in_running_chrome":
-                await status_msg.edit_text(f"🚀 *Substack Note Published Live Directly in Your Chrome!*\n\n🔗 *URL:* {res.get('url')}\n\n📝 *Note:*\n_{note_text}_", parse_mode="Markdown")
+                await safe_edit_text(status_msg, f"🚀 *Substack Note Published Live Directly in Your Chrome!*\n\n🔗 *URL:* {res.get('url')}\n\n📝 *Note:*\n{note_text}")
             elif res.get("status") == "opened_in_active_chrome":
-                await status_msg.edit_text(f"📝 *Substack Notes Opened in Active Chrome!*\n\n✅ Note text & image primed.\n🔗 *URL:* {res.get('url')}", parse_mode="Markdown")
+                await safe_edit_text(status_msg, f"📝 *Substack Notes Opened in Active Chrome!*\n\n✅ Note text & image primed.\n🔗 *URL:* {res.get('url')}")
             else:
-                await status_msg.edit_text(f"🔴 *Substack Note Ready in Chrome!*\n\nStatus: `{res.get('status')}`\nURL: {res.get('url', '')}")
+                await safe_edit_text(status_msg, f"🔴 *Substack Note Ready in Chrome!*\n\nStatus: `{res.get('status')}`\nURL: {res.get('url', '')}")
         except Exception as e:
             logger.error(f"Error publishing Substack Note: {e}", exc_info=True)
-            await status_msg.edit_text(f"❌ Substack Note publishing error: {str(e)}")
+            await safe_edit_text(status_msg, f"❌ Substack Note publishing error: {str(e)}", parse_mode=None)
 
     # 5. Bulk Publish all Buffer Channels
     elif query.data == "publish_buffer":
@@ -426,8 +453,12 @@ async def button_callback_handler(update: Update, context: ContextTypes.DEFAULT_
             text = content.get(plat, {}).get("post", "")
             if text:
                 res = pub.publish_post(plat, text, share_now=True, media_path=hero_img)
-                status = "✔ Sent Live" if res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {}).get("status") == "sent" else "Queued / Checked"
+                post_obj = res.get("response", {}).get("data", {}).get("createPost", {}).get("post", {})
+                status = "✔ Sent Live" if post_obj.get("status") in ["sent", "sending"] else "Queued / Checked"
                 results.append(f"• *{plat.upper()}:* {status}")
+
+        result_text = "🚀 *Published to Buffer Channels (with Hero Image):*\n\n" + "\n".join(results)
+        await safe_edit_text(query.message, result_text)
 
         result_text = "🚀 *Published to Buffer Channels (with Hero Image):*\n\n" + "\n".join(results)
         await query.message.reply_text(result_text, parse_mode="Markdown")
